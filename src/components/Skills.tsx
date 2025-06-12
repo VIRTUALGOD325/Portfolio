@@ -22,15 +22,15 @@ const Skills = () => {
         { name: 'Node.js', level: 88 },
         { name: 'Python', level: 82 },
         { name: 'Express.js', level: 85 },
-        { name: 'PostgreSQL', level: 80 }
+        { name: 'MySQL', level: 80 }
       ]
     },
     {
       title: 'Tools & DevOps',
       skills: [
         { name: 'Git/GitHub', level: 95 },
-        { name: 'Docker', level: 78 },
-        { name: 'AWS', level: 75 },
+        { name: 'Docker', level: 68 },
+        { name: 'AWS', level: 45 },
         { name: 'Figma', level: 88 }
       ]
     }
@@ -103,8 +103,61 @@ const Skills = () => {
           <h3 className="text-xl font-semibold mb-6">Additional Technologies</h3>
           <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
             {[
-              'GraphQL', 'Redux', 'Jest', 'Cypress', 'Webpack', 'Vite',
-              'MongoDB', 'Redis', 'Nginx', 'Linux', 'CI/CD', 'Microservices'
+              'MongoDB',
+              'Redis',
+              'Nginx',
+              'Linux',
+              'CI/CD',
+              'Microservices',
+              'C',
+              'C#',
+              'C++',
+              'Java',
+              'HTML5',
+              'JavaScript',
+              'PHP',
+              'Python',
+              'Firebase',
+              'Heroku',
+              'Oracle',
+              'Anaconda',
+              'Apache Kafka',
+              'Flask',
+              'FastAPI',
+              'JavaFX',
+              'Node.js',
+              'OpenCV',
+              'React',
+              'React Native',
+              'React Query',
+              'Yarn',
+              'Wordpress',
+              'Apache',
+              'Apache Maven',
+              'Apache Tomcat',
+              'MySQL',
+              'Canva',
+              'Blender',
+              'Figma',
+              'Keras',
+              'Matplotlib',
+              'Numpy',
+              'Pandas',
+              'Plotly',
+              'Scikit-Learn',
+              'Scipy',
+              'Tensorflow',
+              'Github',
+              'Git',
+              'Docker',
+              'Cisco',
+              'Gradle',
+              'Kubernetes',
+              'Postman',
+              'Power BI',
+              'Swagger',
+              'UnrealEngine',
+              'Unity'
             ].map((tech, index) => (
               <span
                 key={tech}
