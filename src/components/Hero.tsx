@@ -50,7 +50,7 @@ const Hero = () => {
           <div className="space-y-4">
             <p className="text-primary text-lg font-medium">Hello, I'm</p>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">
-              <span className="gradient-text">Alex Johnson</span>
+              <span className="gradient-text">Tanishq Nabar</span>
             </h1>
             <div className="h-16 flex items-center justify-center">
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-muted-foreground">

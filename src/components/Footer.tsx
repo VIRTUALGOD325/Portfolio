@@ -1,4 +1,3 @@
-
 import { Code2, Heart } from 'lucide-react';
 
 const Footer = () => {
@@ -8,7 +7,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex items-center space-x-2">
             <Code2 className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Alex Johnson</span>
+            <span className="font-semibold">Tanishq Nabar</span>
           </div>
           
           <div className="flex items-center space-x-2 text-muted-foreground">
