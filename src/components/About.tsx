@@ -1,88 +1,118 @@
-
-import { Code, Palette, Zap, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useInView } from 'framer-motion';
+import { useRef } from 'react';
+import { Brain, Code2, Cpu, BookOpen } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.15, duration: 0.6, ease: 'easeOut' },
+  }),
+};
+
 const About = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-100px' });
+
   const features = [
     {
-      icon: Code,
-      title: 'Clean Code',
-      description: 'Writing maintainable, scalable, and efficient code that stands the test of time.'
+      icon: Brain,
+      title: 'AI / ML',
+      description: 'Building end-to-end AI systems: semantic search, NLP pipelines, and LLM integrations.',
     },
     {
-      icon: Palette,
-      title: 'Design Focus',
-      description: 'Creating beautiful, intuitive interfaces that provide exceptional user experiences.'
+      icon: Code2,
+      title: 'Backend Dev',
+      description: 'Python-first backend systems with REST APIs, data pipelines, and cloud deployments.',
     },
     {
-      icon: Zap,
-      title: 'Performance',
-      description: 'Optimizing applications for speed, efficiency, and seamless user interactions.'
+      icon: Cpu,
+      title: 'Android & IoT',
+      description: 'Native Android apps (Java/Kotlin) with Bluetooth/IoT integrations and hardware control.',
     },
     {
-      icon: Users,
-      title: 'Collaboration',
-      description: 'Working closely with teams to deliver projects that exceed expectations.'
-    }
+      icon: BookOpen,
+      title: 'Research',
+      description: 'Published researcher — Best Paper Award (SSIC 2025) and Springer LNNS (SmartCom 2026).',
+    },
   ];
 
   return (
-    <section id="about" className="py-20 bg-card/30">
+    <section id="about" className="py-20 bg-card/30" ref={ref}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             About <span className="gradient-text">Me</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            I'm a passionate developer with 5+ years of experience creating digital solutions 
-            that make a difference. I love turning complex problems into simple, beautiful designs.
+            I build AI-powered tools and backend systems that solve real problems.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="prose prose-lg dark:prose-invert">
-              <p className="text-muted-foreground leading-relaxed">
-                My journey in tech started with curiosity and has evolved into a passion for creating 
-                innovative solutions. I specialize in modern web technologies and love staying on the 
-                cutting edge of development trends.
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, x: -40 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.1 }}
+          >
+            <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <p>
+                I'm a final-year BTech Computer Engineering student at NMIMS, Mumbai, graduating in
+                July 2026. My work spans AI/ML pipelines, backend development, and Android apps —
+                with a focus on practical, end-to-end systems that work in the real world.
               </p>
-              <p className="text-muted-foreground leading-relaxed">
-                When I'm not coding, you'll find me exploring new technologies, contributing to open 
-                source projects, or sharing knowledge with the developer community. I believe in the 
-                power of collaboration and continuous learning.
+              <p>
+                My capstone project, <span className="text-foreground font-medium">DocInsight</span>,
+                is a deployed AI system that detects document originality using semantic similarity
+                (SBERT), stylometric analysis, and citation masking. It was recognized with a Best
+                Paper Award at SSIC 2025 and published in Springer LNNS.
+              </p>
+              <p>
+                Currently interning at <span className="text-foreground font-medium">Eduprime Technologies</span>,
+                where I'm building browser-based Arduino IDE tooling. Previously interned at Moringa
+                and Skandha. I'm actively looking for AI/Backend/Android roles for my gap year (Jul 2026–Jul 2027).
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Docker'].map((tech) => (
-                <span
-                  key={tech}
-                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                >
+              {['Python', 'LangChain', 'FastAPI', 'OpenAI API', 'MongoDB', 'Android', 'TypeScript', 'Docker'].map((tech) => (
+                <span key={tech} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                   {tech}
                 </span>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {features.map((feature, index) => (
-              <Card
+              <motion.div
                 key={feature.title}
-                className="card-hover border-border/50 bg-card/50 backdrop-blur-sm"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                custom={index}
+                variants={fadeUp}
+                initial="hidden"
+                animate={isInView ? 'visible' : 'hidden'}
               >
-                <CardContent className="p-6 text-center">
-                  <div className="mb-4 flex justify-center">
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <feature.icon className="h-6 w-6 text-primary" />
+                <Card className="card-hover border-border/50 bg-card/50 backdrop-blur-sm h-full">
+                  <CardContent className="p-6 text-center">
+                    <div className="mb-4 flex justify-center">
+                      <div className="p-3 rounded-full bg-primary/10">
+                        <feature.icon className="h-6 w-6 text-primary" />
+                      </div>
                     </div>
-                  </div>
-                  <h3 className="font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
+                    <h3 className="font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>

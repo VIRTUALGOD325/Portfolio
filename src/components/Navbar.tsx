@@ -11,6 +11,7 @@ const Navbar = () => {
     { id: 'about', label: 'About' },
     { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
+    { id: 'publications', label: 'Research' },
     { id: 'contact', label: 'Contact' },
   ];
 
@@ -38,7 +39,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Code2 className="h-8 w-8 text-primary mr-2" />
-            <span className="font-bold text-xl gradient-text">DevPortfolio</span>
+            <span className="font-bold text-xl gradient-text">Tanishq Nabar</span>
           </div>
 
           {/* Desktop Navigation */}

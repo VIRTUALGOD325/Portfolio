@@ -66,8 +66,8 @@ const Contact = () => {
             Get In <span className="gradient-text">Touch</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Ready to start your next project? Let's discuss how we can work together 
-            to bring your ideas to life.
+            Open to AI/ML, backend, and Android roles in Mumbai, Pune, or remote.
+            Let's talk.
           </p>
         </div>
 
@@ -162,9 +162,9 @@ const Contact = () => {
             <div>
               <h3 className="text-2xl font-semibold mb-6">Let's Connect</h3>
               <p className="text-muted-foreground mb-8">
-                I'm always interested in hearing about new opportunities and projects. 
-                Whether you're a company looking to hire, or you're someone with an 
-                interesting project, I'd love to hear from you.
+                I'm a final-year CS student graduating in July 2026, actively looking for
+                roles in AI/ML engineering, backend development, and Android development.
+                Mumbai/Pune/remote preferred. Always happy to chat about interesting projects too.
               </p>
             </div>
 
