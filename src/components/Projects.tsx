@@ -12,7 +12,7 @@ const projects = [
     description:
       'AI-powered plagiarism and originality detection system using SBERT semantic similarity, stylometric analysis, and citation masking. Built for my capstone — won Best Paper Award at SSIC 2025 and published in Springer LNNS.',
     technologies: ['Python', 'SBERT', 'FastAPI', 'PostgreSQL', 'Docker', 'Vercel'],
-    liveUrl: 'https://capstoneverceldepmain.vercel.app',
+    liveUrl: 'https://frontend-mu-bice-99.vercel.app',
     githubUrl: 'https://github.com/VIRTUALGOD325/capstoneverceldep_main',
     badge: 'Best Paper Award',
     badgeColor: 'from-yellow-500 to-orange-500',
