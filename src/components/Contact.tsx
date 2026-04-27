@@ -1,211 +1,74 @@
+import { Mail, Github, Linkedin, Phone, MapPin, Send } from 'lucide-react';
 
-import { useState } from 'react';
-import { Send, Mail, Phone, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+const LINKS = [
+  { icon: <Mail size={13}/>,    key: 'Email',    val: 'tanishqnabar10@gmail.com',              href: 'mailto:tanishqnabar10@gmail.com' },
+  { icon: <Github size={13}/>,  key: 'GitHub',   val: 'github.com/VIRTUALGOD325',               href: 'https://github.com/VIRTUALGOD325' },
+  { icon: <Linkedin size={13}/>,key: 'LinkedIn', val: 'linkedin.com/in/tanishq-nabar-4768ab315',href: 'https://linkedin.com/in/tanishq-nabar-4768ab315' },
+  { icon: <Phone size={13}/>,   key: 'Phone',    val: '+91 7977927224',                         href: 'tel:+917977927224' },
+  { icon: <MapPin size={13}/>,  key: 'Location', val: 'Mumbai, Maharashtra, India',             href: null },
+];
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message sent!",
-        description: "Thanks for reaching out. I'll get back to you soon.",
-      });
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setIsSubmitting(false);
-    }, 1000);
-  };
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      label: 'Email',
-      value: 'tanishqnabar10@gmail.com',
-      href: 'mailto:tanishqnabar10@gmail.com'
-    },
-    {
-      icon: Phone,
-      label: 'Phone',
-      value: '+91 7977927224',
-      href: 'tel:+91 7977927224'
-    },
-    {
-      icon: MapPin,
-      label: 'Location',
-      value: 'Mumbai, MH',
-      href: '#'
-    }
-  ];
-
+export default function Contact() {
   return (
-    <section id="contact" className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Get In <span className="gradient-text">Touch</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Open to AI/ML, backend, and Android roles in Mumbai, Pune, or remote.
-            Let's talk.
-          </p>
+    <section id="contact">
+      <div className="pf-container">
+        <div style={{ marginBottom: 40 }}>
+          <div className="sec-num">/06 · Contact</div>
+          <div className="sec-title">Get in Touch</div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-2">
-                      Name
-                    </label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full"
-                      placeholder="Your name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email
-                    </label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                    Subject
-                  </label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full"
-                    placeholder="Project discussion"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Message
-                  </label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required
-                    rows={6}
-                    className="w-full resize-none"
-                    placeholder="Tell me about your project..."
-                  />
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full group tech-glow"
-                >
-                  {isSubmitting ? (
-                    'Sending...'
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+        <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
 
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-2xl font-semibold mb-6">Let's Connect</h3>
-              <p className="text-muted-foreground mb-8">
-                I'm a final-year CS student graduating in July 2026, actively looking for
-                roles in AI/ML engineering, backend development, and Android development.
-                Mumbai/Pune/remote preferred. Always happy to chat about interesting projects too.
-              </p>
+          {/* Contact table */}
+          <div className="cell">
+            <div className="cell-head">
+              <div className="lbl"><Send size={12}/> Contact Info</div>
+              <span className="chip green"><span className="dot" style={{ width: 5, height: 5 }} /> Responds &lt; 24h</span>
             </div>
+            <table className="data-table">
+              <tbody>
+                {LINKS.map(l => (
+                  <tr key={l.key} style={{ cursor: 'default' }}>
+                    <td style={{ width: 96, color: 'var(--dim)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>{l.icon}{l.key}</div>
+                    </td>
+                    <td>
+                      {l.href
+                        ? <a href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" style={{ color: 'var(--blue)', fontSize: 12 }}>{l.val}</a>
+                        : <span style={{ color: 'var(--muted)', fontSize: 12 }}>{l.val}</span>
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="space-y-4">
-              {contactInfo.map((info, index) => (
-                <Card
-                  key={info.label}
-                  className="border-border/50 bg-card/50 backdrop-blur-sm card-hover"
-                >
-                  <CardContent className="p-4">
-                    <a
-                      href={info.href}
-                      className="flex items-center space-x-4 group"
-                    >
-                      <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                        <info.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{info.label}</p>
-                        <p className="text-muted-foreground group-hover:text-primary transition-colors">
-                          {info.value}
-                        </p>
-                      </div>
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="pt-8">
-              <h4 className="font-semibold mb-4">Response Time</h4>
-              <p className="text-muted-foreground">
-                I typically respond to emails within 24 hours. For urgent matters, 
-                feel free to reach out via phone or LinkedIn.
+          {/* Note */}
+          <div className="cell">
+            <div className="cell-head"><div className="lbl">// Note</div></div>
+            <div className="cell-body">
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--text)', marginBottom: 14, lineHeight: 1.3, fontStyle: 'italic' }}>
+                Open to AI/ML, Backend &amp; Android roles
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.85, marginBottom: 24 }}>
+                Final-year BTech student graduating July 2026. Actively seeking full-time opportunities in Mumbai, Pune, or remote.
+                <br /><br />
+                I'm particularly interested in roles involving AI/ML pipelines, backend systems, or Android development.
+                Response time is typically within 24 hours.
               </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <a href="mailto:tanishqnabar10@gmail.com" className="pf-btn pf-btn-primary" style={{ fontSize: 11 }}>
+                  <Mail size={12} /> Send Email
+                </a>
+                <a href="/resume.pdf" download="Tanishq_Nabar_Resume.pdf" className="pf-btn" style={{ fontSize: 11 }}>
+                  Download Resume
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default Contact;
+}

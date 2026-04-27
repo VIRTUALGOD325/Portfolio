@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tanishq Nabar — Terminal Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:    #00ff41;
+    --green-dim: #00b32c;
+    --green-faint: #003d0d;
+    --amber:    #ffb000;
+    --red:      #ff3c3c;
+    --cyan:     #00e5ff;
+    --white:    #d0ffd8;
+    --bg:       #050a05;
+    --bg2:      #0b120b;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+
+  /* CRT effect */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ── BOOT SCREEN ── */
+  #boot {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 40px;
+    overflow: hidden;
+  }
+  #boot.hidden { display: none; }
+
+  .boot-line {
+    opacity: 0;
+    white-space: pre;
+    font-size: 13px;
+  }
+  .boot-line.show { opacity: 1; }
+  .boot-line.dim  { color: var(--green-dim); }
+  .boot-line.ok   { color: var(--green); }
+  .boot-line.ok::after { content: '  [ OK ]'; color: var(--green); }
+  .boot-line.warn { color: var(--amber); }
+  .boot-line.err  { color: var(--red); }
+
+  .boot-bar-wrap { display: flex; align-items: center; gap: 12px; opacity: 0; }
+  .boot-bar-wrap.show { opacity: 1; }
+  .boot-bar {
+    flex: 1; height: 8px;
+    border: 1px solid var(--green-dim);
+    background: var(--bg2);
+    max-width: 320px;
+  }
+  .boot-bar-fill {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 6px var(--green);
+  }
+  .boot-pct { color: var(--green); min-width: 36px; }
+
+  /* ── TERMINAL ── */
+  #terminal {
+    position: fixed; inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  #terminal.visible { opacity: 1; }
+
+  /* title bar */
+  .titlebar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--green-faint);
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .tb-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .tb-dot.r { background: #ff5f56; }
+  .tb-dot.y { background: #ffbd2e; }
+  .tb-dot.g { background: #27c93f; }
+  .tb-title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--green-dim);
+    letter-spacing: 0.08em;
+  }
+  .tb-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid var(--green-faint);
+    color: var(--green-dim);
+    padding: 3px 10px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tb-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 8px rgba(0,255,65,0.2);
+  }
+
+  /* output area */
+  #output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px 8px;
+    scroll-behavior: smooth;
+  }
+  #output::-webkit-scrollbar { width: 6px; }
+  #output::-webkit-scrollbar-track { background: var(--bg); }
+  #output::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 3px; }
+
+  /* input row */
+  .input-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 28px 18px;
+    border-top: 1px solid var(--green-faint);
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .prompt-label {
+    color: var(--green);
+    white-space: nowrap;
+    user-select: none;
+    text-shadow: 0 0 8px var(--green);
+  }
+  .prompt-label .user { color: var(--cyan); }
+  .prompt-label .at   { color: var(--green-dim); }
+  .prompt-label .host { color: var(--green); }
+  .prompt-label .path { color: var(--amber); }
+  #cmd-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 14px;
+    caret-color: var(--green);
+    padding-left: 6px;
+  }
+
+  /* output elements */
+  .out-block { margin-bottom: 14px; }
+
+  .cmd-echo {
+    color: var(--green-dim);
+    margin-bottom: 4px;
+  }
+  .cmd-echo .user { color: var(--cyan); }
+  .cmd-echo .at   { color: var(--green-dim); }
+  .cmd-echo .host { color: var(--green); }
+  .cmd-echo .path { color: var(--amber); }
+  .cmd-echo .typed { color: var(--white); }
+
+  .line { display: block; white-space: pre-wrap; word-break: break-word; }
+  .line.g  { color: var(--green); text-shadow: 0 0 6px rgba(0,255,65,0.4); }
+  .line.d  { color: var(--green-dim); }
+  .line.w  { color: var(--white); }
+  .line.a  { color: var(--amber); }
+  .line.c  { color: var(--cyan); }
+  .line.r  { color: var(--red); }
+
+  .ascii-banner {
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(0,255,65,0.6);
+    font-size: 11px;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    color: var(--cyan);
+    font-weight: 700;
+    border-bottom: 1px solid var(--green-faint);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 8px rgba(0,229,255,0.4);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid var(--green-faint);
+    color: var(--green-dim);
+    font-size: 12px;
+    margin: 2px 3px 2px 0;
+  }
+  .tag.highlight { border-color: var(--green); color: var(--green); }
+  .tag.amber     { border-color: var(--amber); color: var(--amber); }
+  .tag.cyan      { border-color: var(--cyan);  color: var(--cyan);  }
+
+  .proj-title { color: var(--amber); font-weight: 700; }
+  .proj-badge { color: var(--cyan); font-size: 12px; }
+
+  .skill-bar-row { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+  .skill-name { min-width: 200px; color: var(--white); font-size: 13px; }
+  .skill-bar  { flex: 1; height: 6px; background: var(--green-faint); max-width: 240px; }
+  .skill-fill { height: 100%; background: var(--green); box-shadow: 0 0 5px var(--green); }
+  .skill-pct  { color: var(--green-dim); font-size: 12px; min-width: 34px; }
+
+  .help-cmd  { color: var(--amber); min-width: 160px; display: inline-block; }
+  .help-desc { color: var(--green-dim); }
+
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .typing-cursor::after {
+    content: '█';
+    color: var(--green);
+    animation: blink 0.9s step-end infinite;
+  }
+
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; color: var(--green); }
+
+  .separator { color: var(--green-faint); }
+
+  /* mobile tweak */
+  @media (max-width: 600px) {
+    body { font-size: 12px; }
+    #output { padding: 14px 14px 6px; }
+    .input-row { padding: 8px 14px 14px; }
+    .ascii-banner { font-size: 7px; }
+    .skill-name { min-width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ BOOT SCREEN ══ -->
+<div id="boot">
+  <div id="boot-lines"></div>
+</div>
+
+<!-- ══ TERMINAL ══ -->
+<div id="terminal">
+  <div class="titlebar">
+    <div class="tb-dot r"></div>
+    <div class="tb-dot y"></div>
+    <div class="tb-dot g"></div>
+    <span class="tb-title">tanishq@portfolio — bash — 80×24</span>
+    <a href="/site" class="tb-btn">⎋ Normal Site</a>
+  </div>
+  <div id="output"></div>
+  <div class="input-row">
+    <span class="prompt-label">
+      <span class="user">tanishq</span><span class="at">@</span><span class="host">portfolio</span><span class="at">:</span><span class="path">~</span><span class="at">$</span>
+    </span>
+    <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder=" type 'help' to begin..." />
+  </div>
+</div>
+
+<style>
+  body.no-scanlines::before { display: none; }
+  body.no-vignette::after   { display: none; }
+
+  /* ── TWEAKS PANEL ── */
+  #tweaks-panel {
+    display: none;
+    position: fixed;
+    bottom: 24px; right: 24px;
+    width: 260px;
+    background: #0b120b;
+    border: 1px solid var(--green-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green-dim);
+    z-index: 9000;
+    box-shadow: 0 0 24px rgba(0,255,65,0.08);
+  }
+  #tweaks-panel.open { display: block; }
+  .twk-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--green-faint);
+    color: var(--green);
+    cursor: move;
+    user-select: none;
+  }
+  .twk-header span { letter-spacing: 0.1em; font-size: 11px; }
+  .twk-close {
+    background: none; border: none; color: var(--green-dim);
+    cursor: pointer; font-family: inherit; font-size: 14px; line-height: 1;
+    padding: 0 2px;
+  }
+  .twk-close:hover { color: var(--red); }
+  .twk-body { padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+  .twk-section-label {
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--green-dim); margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .twk-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .twk-row label { color: var(--green-dim); font-size: 12px; }
+
+  /* radio buttons */
+  .twk-radios { display: flex; gap: 4px; }
+  .twk-radio {
+    padding: 3px 10px;
+    border: 1px solid var(--green-faint);
+    color: var(--green-dim);
+    background: transparent;
+    font-family: inherit; font-size: 11px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .twk-radio:hover { border-color: var(--green-dim); color: var(--green); }
+  .twk-radio.active { border-color: var(--green); color: var(--green); background: var(--green-faint); }
+
+  /* toggle */
+  .twk-toggle {
+    position: relative; width: 36px; height: 18px;
+    background: var(--green-faint); border: 1px solid var(--green-faint);
+    cursor: pointer; transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .twk-toggle.on { background: var(--green-faint); border-color: var(--green); }
+  .twk-toggle-knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    background: var(--green-dim);
+    transition: transform 0.2s, background 0.2s;
+  }
+  .twk-toggle.on .twk-toggle-knob { transform: translateX(18px); background: var(--green); }
+
+  /* slider */
+  .twk-slider { width: 100%; accent-color: var(--green); cursor: pointer; }
+  .twk-slider-val { color: var(--green); min-width: 24px; text-align: right; }
+</style>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+const DATA = {
+  name: 'Tanishq Nabar',
+  username: 'VIRTUALGOD325',
+  roles: ['AI/ML Engineer', 'Backend Developer', 'Android Developer', 'Full Stack Developer'],
+  about: [
+    "Final-year BTech Computer Engineering student at NMIMS, Mumbai.",
+    "Graduating July 2026. Actively seeking AI / Backend / Android roles.",
+    "",
+    "My work spans AI/ML pipelines, backend systems, and Android apps —",
+    "focused on practical, end-to-end software that solves real problems.",
+    "",
+    "Capstone: DocInsight — an AI doc originality system using SBERT,",
+    "stylometric analysis & citation masking.",
+    "→ Best Paper Award @ SSIC 2025 | Published in Springer LNNS.",
+    "",
+    "Currently interning @ Eduprime Technologies (browser-based Arduino IDE).",
+    "Previously: Moringa, Skandha.",
+  ],
+  skills: [
+    { cat: 'AI / ML',
+      items: [
+        { name: 'Python',                level: 90 },
+        { name: 'LangChain / LangGraph', level: 75 },
+        { name: 'OpenAI / Gemini API',   level: 80 },
+        { name: 'Scikit-learn / SBERT',  level: 78 },
+      ]
+    },
+    { cat: 'Backend & Data',
+      items: [
+        { name: 'FastAPI / Flask',   level: 80 },
+        { name: 'MongoDB',           level: 75 },
+        { name: 'PostgreSQL / SQL',  level: 72 },
+        { name: 'REST APIs',         level: 85 },
+      ]
+    },
+    { cat: 'Frontend & Mobile',
+      items: [
+        { name: 'React / TypeScript', level: 78 },
+        { name: 'Android (Java)',      level: 82 },
+        { name: 'Tailwind CSS',        level: 80 },
+        { name: 'Node.js',             level: 70 },
+      ]
+    },
+  ],
+  moreTech: ['Docker','Kubernetes','Git','Vector DBs','TensorFlow','Pandas / NumPy','WebSockets','Firebase','Arduino / IoT','Bluetooth HC-05','Microservices','C / C++ / C#','Java','Power BI','Linux','CI/CD'],
+  projects: [
+    {
+      id: 'docinsight',
+      title: 'DocInsight',
+      tagline: 'AI Document Originality Detection',
+      badge: '🏆 Best Paper Award',
+      tech: ['Python','SBERT','FastAPI','PostgreSQL','Docker','Vercel'],
+      desc: [
+        "AI-powered plagiarism & originality detection using SBERT semantic",
+        "similarity, stylometric analysis, and citation masking.",
+        "Capstone project — Best Paper Award @ SSIC 2025.",
+        "Published in Springer LNNS (SmartCom 2026).",
+      ],
+      live: 'https://frontend-mu-bice-99.vercel.app',
+      repo: 'https://github.com/VIRTUALGOD325/capstoneverceldep_main',
+    },
+    {
+      id: 'ccparser',
+      title: 'Credit Card Statement Parser',
+      tagline: 'Multi-bank PDF Data Extraction Pipeline',
+      badge: 'Data Engineering',
+      tech: ['Python','PDF Parsing','Data Pipelines','GUI','Multi-bank'],
+      desc: [
+        "Parses structured financial data from credit card statements across",
+        "5 major Indian banks: HDFC, SBI, IDBI, Saraswat, NKGSB.",
+        "Features GUI app, mock data generator, modular parser arch.",
+      ],
+      repo: 'https://github.com/VIRTUALGOD325/Credit-Card-Statement-Parser',
+    },
+    {
+      id: 'aitaskmanager',
+      title: 'AI Task Manager',
+      tagline: 'OpenAI-Powered Productivity App',
+      badge: 'OpenAI Integration',
+      tech: ['React','Vite','OpenAI API','Tailwind CSS','JavaScript'],
+      desc: [
+        "Intelligent task manager using OpenAI API to prioritize tasks,",
+        "suggest schedules, and generate performance insights.",
+      ],
+      repo: 'https://github.com/VIRTUALGOD325/AI-TaskManager',
+    },
+    {
+      id: 'arduinobt',
+      title: 'ArduinoBT Control App',
+      tagline: 'Bluetooth Android Hardware Controller',
+      badge: 'IoT / Android',
+      tech: ['Java','Android','Bluetooth','HC-05','IoT','Android Studio'],
+      desc: [
+        "Native Android app for controlling Arduino hardware over Bluetooth.",
+        "Supports D-pad, joystick, voice commands, and tilt controls.",
+        "Custom BT connection manager with clean modular arch.",
+      ],
+      repo: 'https://github.com/VIRTUALGOD325/ArduinoBTControlApp',
+    },
+    {
+      id: 'arduinolink',
+      title: 'Arduino Code Link',
+      tagline: 'Browser-based Arduino IDE & Memory Monitor',
+      badge: 'Internship Project',
+      tech: ['JavaScript','Node.js','WebSockets','Arduino','Embedded'],
+      desc: [
+        "Browser-based compiler + IDE for uploading code to Arduino boards.",
+        "Serial terminal, memory leak monitor, syntax highlighting.",
+        "Built during internship @ Eduprime Technologies.",
+      ],
+      repo: 'https://github.com/VIRTUALGOD325/Arduino_Code_Link',
+    },
+    {
+      id: 'ciphershare',
+      title: 'CipherShare',
+      tagline: 'Secure Decentralized Cloud Storage',
+      badge: 'Microservices',
+      tech: ['Java','Docker','Kubernetes','MySQL','Microservices','REST APIs'],
+      desc: [
+        "Microservices-based secure file storage & sharing platform.",
+        "Audit logging, Docker/Kubernetes orchestration, RESTful APIs.",
+        "Designed for scalable, secure cloud deployments.",
+      ],
+      repo: 'https://github.com/VIRTUALGOD325/CipherShare',
+    },
+  ],
+  contact: {
+    email:    'tanishqnabar10@gmail.com',
+    phone:    '+91 7977927224',
+    location: 'Mumbai, MH, India',
+    github:   'https://github.com/VIRTUALGOD325',
+    linkedin: 'https://linkedin.com/in/tanishq-nabar-4768ab315',
+  },
+  stats: { papers: 2, internships: 3, projects: '10+' },
+};
+
+const BANNER = `
+ ████████╗ █████╗ ███╗   ██╗██╗███████╗██╗  ██╗ ██████╗ 
+    ██╔══╝██╔══██╗████╗  ██║██║██╔════╝██║  ██║██╔═══██╗
+    ██║   ███████║██╔██╗ ██║██║███████╗███████║██║   ██║
+    ██║   ██╔══██║██║╚██╗██║██║╚════██║██╔══██║██║▄▄ ██║
+    ██║   ██║  ██║██║ ╚████║██║███████║██║  ██║╚██████╔╝
+    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚═╝  ╚═╝ ╚══▀▀═╝ 
+  ███╗   ██╗ █████╗ ██████╗  █████╗ ██████╗ 
+  ████╗  ██║██╔══██╗██╔══██╗██╔══██╗██╔══██╗
+  ██╔██╗ ██║███████║██████╔╝███████║██████╔╝
+  ██║╚██╗██║██╔══██║██╔══██╗██╔══██║██╔══██╗
+  ██║ ╚████║██║  ██║██████╔╝██║  ██║██║  ██║
+  ╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝`;
+
+// ══════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ══════════════════════════════════════════════
+const bootLines = [
+  { text: 'PORTFOLIO BIOS v2.6.0  Copyright (C) 2026 Tanishq Nabar', cls: 'dim' },
+  { text: 'CPU: AI/ML Engine @ 3.6GHz  |  RAM: 8192MB  |  GPU: Neural Processing Unit', cls: 'dim' },
+  { text: '', cls: 'dim' },
+  { text: 'Initializing system...', cls: 'dim' },
+  { text: '[    0.000000] Kernel 6.1.0-portfolio loading...', cls: 'dim' },
+  { text: '[    0.112345] Memory self-test: 8192MB OK', cls: 'ok' },
+  { text: '[    0.234567] Loading AI/ML modules...', cls: 'ok' },
+  { text: '[    0.356789] Loading Backend modules...', cls: 'ok' },
+  { text: '[    0.478901] Loading Android modules...', cls: 'ok' },
+  { text: '[    0.590123] Mounting /dev/projects...', cls: 'ok' },
+  { text: '[    0.712345] Starting research daemon... (2 papers loaded)', cls: 'ok' },
+  { text: '[    0.834567] Loading GitHub interface...', cls: 'ok' },
+  { text: '[    0.956789] Connecting internship records...', cls: 'ok' },
+  { text: '[    1.078901] WARN: Resume download path not yet configured', cls: 'warn' },
+  { text: '[    1.200123] Starting portfolio service...', cls: 'ok' },
+  { text: '', cls: 'dim' },
+  { text: 'PROGRESS', cls: 'bar' },
+  { text: '', cls: 'dim' },
+  { text: 'System ready. Type \'help\' for available commands.', cls: 'g' },
+];
+
+async function runBoot() {
+  const container = document.getElementById('boot-lines');
+
+  for (let i = 0; i < bootLines.length; i++) {
+    const b = bootLines[i];
+    await sleep(b.cls === 'dim' || b.cls === '' ? 18 : 45);
+
+    if (b.cls === 'bar') {
+      // render progress bar
+      const wrap = document.createElement('div');
+      wrap.className = 'boot-bar-wrap';
+      wrap.innerHTML = `<span style="color:var(--green-dim);font-size:13px">Loading</span>
+        <div class="boot-bar"><div class="boot-bar-fill" id="bfill"></div></div>
+        <span class="boot-pct" id="bpct">0%</span>`;
+      container.appendChild(wrap);
+      await sleep(50);
+      wrap.classList.add('show');
+      await animateBar();
+      continue;
+    }
+
+    const el = document.createElement('div');
+    el.className = `boot-line ${b.cls}`;
+    el.textContent = b.text;
+    container.appendChild(el);
+    await sleep(10);
+    el.classList.add('show');
+  }
+
+  await sleep(400);
+  // fade out boot, show terminal
+  document.getElementById('boot').style.transition = 'opacity 0.6s';
+  document.getElementById('boot').style.opacity = '0';
+  await sleep(600);
+  document.getElementById('boot').classList.add('hidden');
+  const term = document.getElementById('terminal');
+  term.style.display = 'flex';
+  await sleep(50);
+  term.classList.add('visible');
+  // print welcome
+  printWelcome();
+  focusInput();
+}
+
+async function animateBar() {
+  const fill = document.getElementById('bfill');
+  const pct  = document.getElementById('bpct');
+  for (let p = 0; p <= 100; p += 2) {
+    fill.style.width = p + '%';
+    pct.textContent  = p + '%';
+    await sleep(22);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  TERMINAL ENGINE
+// ══════════════════════════════════════════════
+const output  = document.getElementById('output');
+const cmdInput = document.getElementById('cmd-input');
+const history = [];
+let   histIdx  = -1;
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function focusInput() {
+  document.addEventListener('click', () => cmdInput.focus());
+  cmdInput.focus();
+}
+
+cmdInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const val = cmdInput.value.trim();
+    cmdInput.value = '';
+    if (val) { history.unshift(val); histIdx = -1; }
+    handleCommand(val);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < history.length - 1) { histIdx++; cmdInput.value = history[histIdx]; }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) { histIdx--; cmdInput.value = history[histIdx]; }
+    else { histIdx = -1; cmdInput.value = ''; }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    autoComplete();
+  } else if (e.key === 'l' && e.ctrlKey) {
+    e.preventDefault();
+    handleCommand('clear');
+  }
+});
+
+function autoComplete() {
+  const cmds = ['help','about','whoami','skills','projects','contact','social','resume','banner','ls','clear','exit'];
+  const val = cmdInput.value.toLowerCase();
+  const match = cmds.find(c => c.startsWith(val));
+  if (match) cmdInput.value = match;
+}
+
+function echoCmd(cmd) {
+  const div = document.createElement('div');
+  div.className = 'cmd-echo';
+  div.innerHTML = `<span class="user">tanishq</span><span class="at">@</span><span class="host">portfolio</span><span class="at">:</span><span class="path">~</span><span class="at">$</span> <span class="typed">${escHtml(cmd)}</span>`;
+  output.appendChild(div);
+}
+
+function addBlock(html) {
+  const div = document.createElement('div');
+  div.className = 'out-block';
+  div.innerHTML = html;
+  output.appendChild(div);
+  output.scrollTop = output.scrollHeight;
+}
+
+function line(text, cls='') {
+  return `<span class="line ${cls}">${escHtml(text)}</span>`;
+}
+function rawLine(html, cls='') {
+  return `<span class="line ${cls}">${html}</span>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function printWelcome() {
+  let h = `<div class="ascii-banner">${escHtml(BANNER)}</div>`;
+  h += rawLine(`<span style="color:var(--cyan)">  Tanishq Nabar</span> <span style="color:var(--green-dim)">— AI/ML · Backend · Android · Full Stack</span>`) + '\n';
+  h += rawLine(`  <span style="color:var(--green-dim)">Final-year BTech CS @ NMIMS Mumbai · Graduating July 2026</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  <span class="tag amber">2 Research Papers</span> <span class="tag cyan">3+ Internships</span> <span class="tag highlight">10+ Projects</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  Type <span style="color:var(--amber)">help</span> to see available commands. Use <span style="color:var(--amber)">Tab</span> to autocomplete.`);
+  addBlock(h);
+}
+
+function handleCommand(raw) {
+  if (!raw) return;
+  echoCmd(raw);
+  const [cmd, ...args] = raw.trim().toLowerCase().split(/\s+/);
+
+  switch(cmd) {
+    case 'help':     cmdHelp();     break;
+    case 'whoami':
+    case 'about':    cmdAbout();    break;
+    case 'skills':   cmdSkills();   break;
+    case 'projects': cmdProjects(args[0]); break;
+    case 'project':  cmdProjectDetail(args[0]); break;
+    case 'contact':  cmdContact();  break;
+    case 'social':   cmdSocial();   break;
+    case 'resume':   cmdResume();   break;
+    case 'banner':   printWelcome(); break;
+    case 'ls':       cmdLs();       break;
+    case 'clear':    output.innerHTML = ''; break;
+    case 'exit':
+      addBlock(line('Nice try. You cannot exit the portfolio. Try \'help\' instead.', 'a'));
+      break;
+    case 'sudo':
+      addBlock(line('tanishq is not in the sudoers file. This incident will be reported.', 'r'));
+      break;
+    case 'vim': case 'nano': case 'emacs':
+      addBlock(line(`${cmd}: no escape. just type 'help'.`, 'a'));
+      break;
+    default:
+      addBlock(rawLine(`<span class="r">bash: ${escHtml(cmd)}: command not found</span> — try <span class="a">help</span>`));
+  }
+  output.scrollTop = output.scrollHeight;
+}
+
+function cmdHelp() {
+  let h = `<div class="section-title">AVAILABLE COMMANDS</div>`;
+  const cmds = [
+    ['resume',          'View & download resume'],
+    ['whoami / about',  'Personal info & background'],
+    ['skills',          'Technical skills & proficiency'],
+    ['projects',        'List all featured projects'],
+    ['project [id]',    'Detailed view of a project  (e.g. project docinsight)'],
+    ['contact',         'Email, phone, location'],
+    ['social',          'GitHub & LinkedIn links'],
+    ['banner',          'Reprint the ASCII banner'],
+    ['ls',              'List portfolio sections'],
+    ['clear',           'Clear the terminal'],
+    ['help',            'Show this message'],
+  ];
+  cmds.forEach(([c, d]) => {
+    h += rawLine(`  <span class="help-cmd">${escHtml(c)}</span><span class="help-desc">${escHtml(d)}</span>`) + '\n';
+  });
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Tip: use ↑ ↓ for history · Tab to autocomplete · Ctrl+L to clear</span>`);
+  addBlock(h);
+}
+
+function cmdAbout() {
+  let h = `<div class="section-title">ABOUT</div>`;
+  DATA.about.forEach(l => {
+    h += line(l, l.startsWith('→') ? 'a' : l === '' ? '' : 'w') + '\n';
+  });
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Education :</span> <span class="w">BTech Computer Engineering — NMIMS, Mumbai</span>`) + '\n';
+  h += rawLine(`  <span class="d">Graduation:</span> <span class="w">July 2026</span>`) + '\n';
+  h += rawLine(`  <span class="d">Looking for:</span> <span class="a">AI/ML · Backend · Android roles (Mumbai / Pune / Remote)</span>`);
+  addBlock(h);
+}
+
+function cmdSkills() {
+  let h = `<div class="section-title">TECHNICAL SKILLS</div>`;
+  DATA.skills.forEach(cat => {
+    h += rawLine(`<span class="c">${escHtml(cat.cat)}</span>`) + '\n';
+    cat.items.forEach(s => {
+      const filled = Math.round(s.level / 100 * 30);
+      const bar = '█'.repeat(filled) + '░'.repeat(30 - filled);
+      h += rawLine(`  <span class="skill-name">${escHtml(s.name)}</span> <span style="color:var(--green);letter-spacing:0">${bar}</span> <span class="skill-pct">${s.level}%</span>`) + '\n';
+    });
+    h += line('') + '\n';
+  });
+  h += rawLine(`<span class="c">More Tech</span>`) + '\n';
+  h += '  ' + DATA.moreTech.map(t => `<span class="tag">${escHtml(t)}</span>`).join('') + '\n';
+  addBlock(h);
+}
+
+function cmdProjects(filter) {
+  let h = `<div class="section-title">FEATURED PROJECTS</div>`;
+  DATA.projects.forEach((p, i) => {
+    h += rawLine(`  <span class="proj-title">${String(i+1).padStart(2,'0')}. ${escHtml(p.title)}</span> <span class="proj-badge">[${escHtml(p.badge)}]</span>`) + '\n';
+    h += rawLine(`      <span class="d">${escHtml(p.tagline)}</span>`) + '\n';
+    h += rawLine(`      <span class="d">id: </span><span class="a">${escHtml(p.id)}</span>`) + '\n';
+    h += line('') + '\n';
+  });
+  h += rawLine(`  <span class="d">Run </span><span class="a">project &lt;id&gt;</span><span class="d"> for full details. e.g. </span><span class="a">project docinsight</span>`);
+  addBlock(h);
+}
+
+function cmdProjectDetail(id) {
+  if (!id) { addBlock(rawLine(`<span class="r">Usage: project &lt;id&gt;</span> — run <span class="a">projects</span> to list all IDs`)); return; }
+  const p = DATA.projects.find(x => x.id === id.toLowerCase());
+  if (!p) { addBlock(rawLine(`<span class="r">Project '${escHtml(id)}' not found.</span> Run <span class="a">projects</span> to see all IDs.`)); return; }
+
+  let h = `<div class="section-title">${escHtml(p.title.toUpperCase())}</div>`;
+  h += rawLine(`  <span class="a">${escHtml(p.tagline)}</span>`) + '\n';
+  h += rawLine(`  <span class="tag amber">${escHtml(p.badge)}</span>`) + '\n';
+  h += line('') + '\n';
+  p.desc.forEach(l => { h += rawLine(`  <span class="w">${escHtml(l)}</span>`) + '\n'; });
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Stack: </span>`) + p.tech.map(t => `<span class="tag highlight">${escHtml(t)}</span>`).join('') + '\n';
+  h += line('') + '\n';
+  if (p.live) h += rawLine(`  <span class="d">Live: </span><a href="${escHtml(p.live)}" target="_blank">${escHtml(p.live)}</a>`) + '\n';
+  h += rawLine(`  <span class="d">Code: </span><a href="${escHtml(p.repo)}" target="_blank">${escHtml(p.repo)}</a>`);
+  addBlock(h);
+}
+
+function cmdContact() {
+  let h = `<div class="section-title">CONTACT</div>`;
+  const c = DATA.contact;
+  h += rawLine(`  <span class="d">Email    </span> <a href="mailto:${c.email}">${c.email}</a>`) + '\n';
+  h += rawLine(`  <span class="d">Phone    </span> <span class="w">${c.phone}</span>`) + '\n';
+  h += rawLine(`  <span class="d">Location </span> <span class="w">${c.location}</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Open to:</span> <span class="a">AI/ML · Backend · Android (Mumbai / Pune / Remote)</span>`) + '\n';
+  h += rawLine(`  <span class="d">Response time: </span><span class="w">within 24 hours</span>`);
+  addBlock(h);
+}
+
+function cmdResume() {
+  let h = `<div class="section-title">RESUME</div>`;
+  h += rawLine(`  <span class="w">Tanishq Nabar — BTech Computer Engineering, NMIMS Mumbai</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Highlights:</span>`) + '\n';
+  h += rawLine(`  <span class="g">→</span> <span class="w">2× Published Researcher (SSIC 2025 Best Paper + Springer LNNS)</span>`) + '\n';
+  h += rawLine(`  <span class="g">→</span> <span class="w">3+ Internships: Eduprime Technologies, Moringa, Skandha</span>`) + '\n';
+  h += rawLine(`  <span class="g">→</span> <span class="w">10+ Projects across AI/ML, Backend, Android & IoT</span>`) + '\n';
+  h += rawLine(`  <span class="g">→</span> <span class="w">Stack: Python · FastAPI · LangChain · Android · React · Docker</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Download: </span><a href="/resume.pdf" download="Tanishq_Nabar_Resume.pdf">resume.pdf</a> <span class="d">(place your resume.pdf in project root)</span>`) + '\n';
+  h += line('') + '\n';
+  h += rawLine(`  <span class="d">Or reach out directly → </span><a href="mailto:tanishqnabar10@gmail.com">tanishqnabar10@gmail.com</a>`);
+  addBlock(h);
+}
+
+function cmdSocial() {
+  let h = `<div class="section-title">SOCIAL / LINKS</div>`;
+  h += rawLine(`  <span class="d">GitHub   </span> <a href="${DATA.contact.github}"  target="_blank">${DATA.contact.github}</a>`)  + '\n';
+  h += rawLine(`  <span class="d">LinkedIn </span> <a href="${DATA.contact.linkedin}" target="_blank">${DATA.contact.linkedin}</a>`);
+  addBlock(h);
+}
+
+function cmdLs() {
+  let h = `<div class="section-title">SECTIONS</div>`;
+  const sections = ['about','skills','projects','contact','social'];
+  h += '  ' + sections.map(s => `<span class="tag highlight">${s}/</span>`).join(' ');
+  addBlock(h);
+}
+
+// ══ START ══
+runBoot();
+</script>
+<!-- ══ TWEAKS PANEL ══ -->
+<div id="tweaks-panel">
+  <div class="twk-header" id="twk-drag-handle">
+    <span>// TWEAKS</span>
+    <button class="twk-close" id="twk-close">✕</button>
+  </div>
+  <div class="twk-body">
+    <div>
+      <div class="twk-section-label">Color Theme</div>
+      <div class="twk-radios">
+        <button class="twk-radio active" data-theme="green">Green</button>
+        <button class="twk-radio" data-theme="amber">Amber</button>
+        <button class="twk-radio" data-theme="blue">Blue</button>
+      </div>
+    </div>
+    <div>
+      <div class="twk-section-label">Font Size</div>
+      <div class="twk-row">
+        <input type="range" class="twk-slider" id="twk-fontsize" min="11" max="18" step="1" value="14" />
+        <span class="twk-slider-val" id="twk-fontsize-val">14px</span>
+      </div>
+    </div>
+    <div>
+      <div class="twk-section-label">CRT Effects</div>
+      <div class="twk-row">
+        <label>Scanlines</label>
+        <div class="twk-toggle on" id="twk-scanlines"><div class="twk-toggle-knob"></div></div>
+      </div>
+      <div class="twk-row">
+        <label>Vignette</label>
+        <div class="twk-toggle on" id="twk-vignette"><div class="twk-toggle-knob"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Tweaks wiring ──────────────────────────────────────────────────
+const THEMES = {
+  green: { '--green':'#00ff41','--green-dim':'#00b32c','--green-faint':'#003d0d','--bg':'#050a05','--bg2':'#0b120b','--white':'#d0ffd8','--cyan':'#00e5ff','--amber':'#ffb000' },
+  amber: { '--green':'#ffb000','--green-dim':'#cc8800','--green-faint':'#3d2800','--bg':'#090600','--bg2':'#120d00','--white':'#fff5d0','--cyan':'#ff6a00','--amber':'#ffe066' },
+  blue:  { '--green':'#00d4ff','--green-dim':'#0099bb','--green-faint':'#002d3d','--bg':'#010a0f','--bg2':'#04141c','--white':'#d0f4ff','--cyan':'#a78bfa','--amber':'#38bdf8' },
+};
+
+function applyTheme(name) {
+  const vars = THEMES[name] || THEMES.green;
+  Object.entries(vars).forEach(([k,v]) => document.documentElement.style.setProperty(k, v));
+}
+
+// theme buttons
+document.querySelectorAll('.twk-radio[data-theme]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.twk-radio[data-theme]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyTheme(btn.dataset.theme);
+  });
+});
+
+// font size
+const fsSlider = document.getElementById('twk-fontsize');
+const fsVal    = document.getElementById('twk-fontsize-val');
+fsSlider.addEventListener('input', () => {
+  document.body.style.fontSize = fsSlider.value + 'px';
+  fsVal.textContent = fsSlider.value + 'px';
+});
+
+// toggles
+function makeToggle(id, cssClass) {
+  const el = document.getElementById(id);
+  let on = true;
+  el.addEventListener('click', () => {
+    on = !on;
+    el.classList.toggle('on', on);
+    document.body.classList.toggle(cssClass, !on);
+  });
+}
+makeToggle('twk-scanlines', 'no-scanlines');
+makeToggle('twk-vignette',  'no-vignette');
+
+// close
+document.getElementById('twk-close').addEventListener('click', () => {
+  document.getElementById('tweaks-panel').classList.remove('open');
+  window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+});
+
+// host protocol
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode')   document.getElementById('tweaks-panel').classList.add('open');
+  if (e.data?.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('open');
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+// drag
+(function() {
+  const panel = document.getElementById('tweaks-panel');
+  const handle = document.getElementById('twk-drag-handle');
+  let ox = 0, oy = 0;
+  handle.addEventListener('mousedown', e => {
+    const r = panel.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    const move = ev => {
+      panel.style.right  = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.left   = (ev.clientX - ox) + 'px';
+      panel.style.top    = (ev.clientY - oy) + 'px';
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@
   "homepage": "https://VIRTUALGOD325.github.io/Portfolio",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && mv dist/index.html dist/site.html && cp dist/terminal.html dist/index.html",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

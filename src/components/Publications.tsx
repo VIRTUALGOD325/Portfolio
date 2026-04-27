@@ -1,94 +1,73 @@
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { Trophy, BookOpen, ExternalLink } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { BookOpen, Award } from 'lucide-react';
 
-const publications = [
+const PAPERS = [
   {
-    title: 'DocInsight: AI-Powered Document Originality and Plagiarism Risk Detection',
-    conference: 'SSIC 2025',
-    publisher: 'Best Paper Award',
-    description:
-      'Multi-layered document originality scoring system combining SBERT semantic similarity, stylometric analysis, and citation masking for explainable AI-driven plagiarism detection.',
-    icon: Trophy,
-    badgeColor: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    iconColor: 'text-yellow-400',
-    bgGradient: 'from-yellow-500/10 to-orange-500/10',
-    year: '2025',
+    id: 'PUB-001',
+    title: 'DocInsight: AI-Powered Document Originality Detection Using SBERT and Stylometric Analysis',
+    venue: 'Springer LNNS — SmartCom 2026',
+    date: 'Mar 2026',
+    status: 'Published',
+    sc: 'green',
+    award: 'Best Paper Award @ SSIC 2025',
+    tags: ['SBERT', 'NLP', 'Plagiarism Detection', 'Stylometric Analysis', 'Citation Masking'],
+    desc: 'Presents a dual-pipeline approach combining SBERT semantic similarity scoring and stylometric fingerprinting for AI-generated document originality detection, with a novel citation-masking technique to handle reference-heavy academic texts.',
   },
   {
-    title: 'SmartCom 2026: Intelligent Systems for Communication and Connectivity',
-    conference: 'SmartCom 2026',
-    publisher: 'Springer LNNS',
-    description:
-      'Published in Springer Lecture Notes in Networks and Systems — exploring intelligent communication systems leveraging AI and embedded technologies.',
-    icon: BookOpen,
-    badgeColor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    iconColor: 'text-blue-400',
-    bgGradient: 'from-blue-500/10 to-purple-500/10',
-    year: '2026',
+    id: 'PUB-002',
+    title: 'Automated Multi-Bank Credit Card Statement Parsing: A Modular Pipeline Approach',
+    venue: 'SSIC 2025 Conference Proceedings',
+    date: 'Dec 2025',
+    status: 'Published',
+    sc: 'green',
+    award: null,
+    tags: ['Data Engineering', 'PDF Parsing', 'Financial Technology', 'Python', 'Modular Architecture'],
+    desc: 'A modular pipeline for automated extraction of structured financial data from heterogeneous credit card statement formats across multiple Indian banking institutions, with a GUI application for non-technical users.',
   },
 ];
 
-const Publications = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
-
+export default function Publications() {
   return (
-    <section id="publications" className="py-20 bg-card/30" ref={ref}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Research <span className="gradient-text">Publications</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Peer-reviewed research in AI systems and intelligent communication.
-          </p>
-        </motion.div>
+    <section id="publications">
+      <div className="pf-container">
+        <div style={{ marginBottom: 40 }}>
+          <div className="sec-num">/05 · Research</div>
+          <div className="sec-title">Publications</div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {publications.map((pub, index) => (
-            <motion.div
-              key={pub.conference}
-              initial={{ opacity: 0, y: 40 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: index * 0.2, duration: 0.6 }}
-            >
-              <Card className={`border-border/50 bg-gradient-to-br ${pub.bgGradient} backdrop-blur-sm hover:border-primary/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-full`}>
-                <CardContent className="p-6 flex flex-col h-full">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-full bg-card/60 shrink-0">
-                      <pub.icon className={`h-6 w-6 ${pub.iconColor}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${pub.badgeColor}`}>
-                          {pub.publisher}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{pub.year}</span>
-                      </div>
-                      <h3 className="font-bold text-base leading-tight">{pub.title}</h3>
-                      <p className="text-sm text-primary mt-1">{pub.conference}</p>
-                    </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {PAPERS.map(p => (
+            <div key={p.id} className="cell">
+              <div className="cell-head">
+                <div className="lbl">
+                  <BookOpen size={12} />
+                  <span style={{ color: 'var(--dim)' }}>{p.id}</span>
+                  <span>{p.venue}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'var(--dim)' }}>{p.date}</span>
+                  <span className={`chip ${p.sc}`}>{p.status}</span>
+                </div>
+              </div>
+              <div className="cell-body">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 10 }}>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--text)', lineHeight: 1.3, fontStyle: 'italic' }}>
+                    {p.title}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                    {pub.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  {p.award && (
+                    <span className="chip amber" style={{ flexShrink: 0, alignSelf: 'flex-start' }}>
+                      <Award size={9} /> {p.award}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.75, marginBottom: 14 }}>{p.desc}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {p.tags.map(t => <span key={t} className="chip">{t}</span>)}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default Publications;
+}
